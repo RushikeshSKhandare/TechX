@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>create Post</title>
+    <link rel="stylesheet" href="index2.css">
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-auth-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+
+</head>
+
+<body>
+    <div id="header">
+        <div id="createpost">
+            <h1> Create Post </h1>
+            <!-- <div id="button">egsva -->
+            <button id="X">X</button>
+
+        </div>
+        <br>
+    </div>
+    <!-- <hr> -->
+    <!-- <div class="writemessage">  -->
+    <div class="txtarea">
+        <textarea cols="30" rows="20" id="textareafield" placeholder="What's on Your Mind ?"></textarea>
+        <video id="video" width="320" height="240" autoplay></video>
+        <button id="click-photo"></button>
+        <!-- <div id="click"></div> -->
+        <canvas id="canvas" width="320" height="240"></canvas>
+    </div>
+    <!-- <hr> -->
+    </div>
+
+    <div class="gallery">
+        <!-- <label class="photo" for="myfile">
+            <input type="file" id="myfile" name="myfile" , onchange='handleimg()'>
+
+            <img src="https://png.pngtree.com/png-vector/20190129/ourlarge/pngtree-gallery-vector-icon-png-image_355839.jpg"
+                alt="" width="40px">
+
+            <h2>Photo/Video</h2>
+        </label> -->
+        <div id="photo">
+            Upload Files<br />
+            <input type="file" id="files" multiple /><br /><br/>
+            <button id="send">Upload</button>
+            <p id="uploading"></p>
+            <progress value="0" max="100" id="progress"></progress>
+            </div>
+
+        <button id="start-camera">
+            <div class="camera">
+                <img src="https://i.stack.imgur.com/V8oUW.jpg" alt="" width="40px" , height="40px">
+                <h2>Camera</h2>
+
+            </div>
+        </button>
+
+    </div>
+    <div class="post">
+        <button type="submit">Post</button>
+    </div>
+
+    <!-- <button id="start-camera">Start Camera</button>
+<video id="video" width="320" height="240" autoplay><p>clcikc</p></video>
+<button id="click-photo">Click Photo</button>
+<canvas id="canvas" width="320" height="240">Click Photo</canvas> -->
+</body>
+
+
+
+<script src="index2.js"></script>
+<script>
+    // capture camera img
+    let btn = false;
+    let camera_button = document.querySelector("#start-camera");
+    let video = document.querySelector("#video");
+    let click_button = document.querySelector("#click-photo");
+    let canvas = document.querySelector("#canvas");
+
+    camera_button.addEventListener('click', async function () {
+        document.getElementById('click-photo').textContent=` click
+   
+        `
+        let stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+
+        video.srcObject = stream;
+
+    });
+
+
+    click_button.addEventListener('click', function () {
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        let image_data_url = canvas.toDataURL('image/jpeg');
+
+        // data url of the image
+        console.log(image_data_url);
+    });
+// upload image
+var files = [];
+document.getElementById("files").addEventListener("change", function(e) {
+  files = e.target.files;
+  for (let i = 0; i < files.length; i++) {
+    console.log(files[i]);
+  }
+});
+
+document.getElementById("send").addEventListener("click", function() {
+  //checks if files are selected
+  if (files.length != 0) {
+    //Loops through all the selected files
+    for (let i = 0; i < files.length; i++) {
+      //create a storage reference
+      var storage = firebase.storage().ref(files[i].name);
+
+      //upload file
+      var upload = storage.put(files[i]);
+
+      //update progress bar
+      upload.on(
+        "state_changed",
+        function progress(snapshot) {
+          var percentage =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          document.getElementById("progress").value = percentage;
+        },
+
+        function error() {
+          alert("error uploading file");
+        },
+
+        function complete() {
+          document.getElementById(
+            "uploading"
+          ).innerHTML += `${files[i].name} upoaded <br />`;
+        }
+      );
+    }
+  } else {
+    alert("No file chosen");
+  }
+});
+
+function getFileUrl(filename) {
+  //create a storage reference
+  var storage = firebase.storage().ref(filename);
+
+  //get file url
+  storage
+    .getDownloadURL()
+    .then(function(url) {
+      console.log(url);
+    })
+    .catch(function(error) {
+      console.log("error encountered");
+    });
+}
+
+</script>
+
+</html>
